@@ -2,18 +2,13 @@ import PropTypes from "prop-types"
 import { useState } from "react"
 import { useDispatch } from "react-redux"
 import { useSelector } from "react-redux"
-import { addCart } from "../store/slice/cartSlice"
-import { useEffect } from "react"
+import { addCart } from "../store/thunk/cartThunk"
+import formatCurrency from "../helpers/formatCurrency"
 
 function AddCart({ product, handleClose }) {
   const [quantity, setQuantity] = useState(1)
-  const { isLoading, message, error } = useSelector((state) => state.cart)
+  const { isLoadingAdd } = useSelector((state) => state.cart)
   const dispatch = useDispatch()
-
-  useEffect(() => {
-    if (error) alert(error)
-    if (message) alert(message)
-  }, [error, message])
 
   const handleChange = (e) => {
     if (e.target.value >= 1 && e.target.value <= product.quantity)
@@ -61,7 +56,7 @@ function AddCart({ product, handleClose }) {
         />
         <div className="flex justify-between mt-1">
           <h2 className="font-bold text-lg">{product.name}</h2>
-          <h3>Rp {product.price}</h3>
+          <h3>IDR {formatCurrency(product.price)}</h3>
         </div>
         <div>
           <label htmlFor="Quantity" className="sr-only">
@@ -99,12 +94,12 @@ function AddCart({ product, handleClose }) {
           Maximum {product.quantity}
         </p>
         <button
-          disabled={isLoading}
+          disabled={isLoadingAdd}
           onClick={handleAddCart}
           type="button"
           className="w-full py-3 rounded text-white bg-teal-600"
         >
-          {isLoading ? (
+          {isLoadingAdd ? (
             <div role="status">
               <svg
                 aria-hidden="true"

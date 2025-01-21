@@ -1,33 +1,21 @@
-import { useState, useContext } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { login } from "../store/thunk/adminThunk"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Spinner from "../components/Spinner"
-import { AuthContext } from "../context/AuthContext"
-import { useEffect } from "react"
+import { useDispatch } from "react-redux"
+import { login } from "../store/thunk/authThunk"
+import { useSelector } from "react-redux"
 
 function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const { isLoading, success, error } = useSelector((state) => state.admin)
-  const { setIsAuthenticated } = useContext(AuthContext)
-  const dispacth = useDispatch()
+  const { isLoadingLogin } = useSelector((state) => state.auth)
   const navigate = useNavigate()
+  const dispacth = useDispatch()
 
   const handleLogin = (e) => {
     e.preventDefault()
-    dispacth(login({ email, password }))
+    dispacth(login({ email, password })).then(() => navigate("/"))
   }
-
-  useEffect(() => {
-    if (success) {
-      alert(success)
-      setIsAuthenticated(true)
-      navigate("/")
-    }
-
-    if (error) alert(error)
-  }, [success, error, setIsAuthenticated, navigate])
 
   return (
     <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
@@ -96,20 +84,14 @@ function Login() {
 
           <div>
             <button
-              disabled={isLoading}
+              disabled={isLoadingLogin}
               type="submit"
               className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
-              {isLoading ? <Spinner /> : "Login"}
+              {isLoadingLogin ? <Spinner /> : "Login"}
             </button>
           </div>
         </form>
-        <p className="text-center mt-5 text-sm text-gray-700">
-          {"Don't"} have an account yet?{" "}
-          <a href="/register" className="text-blue-700 underline">
-            Register
-          </a>
-        </p>
       </div>
     </div>
   )

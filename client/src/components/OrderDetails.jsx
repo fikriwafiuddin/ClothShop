@@ -1,11 +1,37 @@
 import PropTypes from "prop-types"
+import { useDispatch } from "react-redux"
+import { deliveredOrder } from "../store/thunk/orderThunk"
 
 const OrderDetails = ({ order }) => {
+  const dispatch = useDispatch()
+
+  const handleDelivered = () => {
+    dispatch(deliveredOrder(order._id))
+  }
+
+  const colorStatus = (status) => {
+    let color
+    switch (status) {
+      case "pending":
+        color = "text-yellow-500"
+        break
+      case "failed":
+        color = "text-red-500"
+        break
+      case "delivered":
+      case "shipped":
+      case "paid":
+        color = "text-green-500"
+        break
+    }
+
+    return color
+  }
+
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg mb-6">
       <h2 className="text-xl font-bold mb-4">Order ID: {order._id}</h2>
 
-      {/* Alamat Pengiriman */}
       <section className="mb-6">
         <h3 className="text-lg font-semibold mb-2">Shipping Address</h3>
         <p>
@@ -24,7 +50,6 @@ const OrderDetails = ({ order }) => {
         </p>
       </section>
 
-      {/* Daftar Item Pesanan */}
       <section className="mb-6">
         <h3 className="text-lg font-semibold mb-2">Order Items</h3>
         <div className="space-y-4">
@@ -48,21 +73,26 @@ const OrderDetails = ({ order }) => {
         </div>
       </section>
 
-      {/* Jumlah Total dan Status */}
-      <section className="mb-6">
-        <p className="text-lg font-semibold">
-          <strong>Total Amount:</strong> Rp {order.amount.toLocaleString()}
-        </p>
-        <p
-          className={`text-lg font-semibold ${
-            order.status === "pending" ? "text-yellow-500" : "text-green-500"
-          }`}
-        >
-          <strong>Status:</strong> {order.status}
-        </p>
+      <section className="mb-6 flex justify-between">
+        <div>
+          <p className="text-lg font-semibold">
+            <strong>Total Amount:</strong> Rp {order.amount.toLocaleString()}
+          </p>
+          <p className={`text-lg font-semibold ${colorStatus(order.status)}`}>
+            <strong>Status:</strong> {order.status}
+          </p>
+        </div>
+        {order.status === "shipped" && (
+          <button
+            onClick={handleDelivered}
+            type="button"
+            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+          >
+            Delivered
+          </button>
+        )}
       </section>
 
-      {/* Tanggal Pemesanan */}
       <section>
         <p className="text-sm text-gray-500">
           <strong>Order Date:</strong>{" "}
@@ -72,8 +102,6 @@ const OrderDetails = ({ order }) => {
     </div>
   )
 }
-
-// Komponen untuk menampilkan daftar pesanan
 
 OrderDetails.propTypes = {
   order: PropTypes.object.isRequired,

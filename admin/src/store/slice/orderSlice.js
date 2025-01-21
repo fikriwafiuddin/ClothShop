@@ -5,6 +5,7 @@ const orderSlice = createSlice({
   name: "order",
   initialState: {
     orders: [],
+    defaultOrders: [],
     isLoading: false,
     error: null,
   },
@@ -12,11 +13,20 @@ const orderSlice = createSlice({
     sortOrders: (state, action) => {
       const { key, order } = action.payload // `key` untuk kolom, `order` bisa "asc" atau "desc"
       state.orders = state.orders.sort((a, b) => {
+        console.log(a)
         if (order === "asc") {
           return a[key] > b[key] ? 1 : -1
         }
         return a[key] < b[key] ? 1 : -1
       })
+    },
+    filterOrders: (state, action) => {
+      const filter = action.payload.filter
+      if (filter !== "all")
+        state.orders = state.defaultOrders.filter(
+          (order) => order.status === filter
+        )
+      else state.orders = state.defaultOrders
     },
   },
   extraReducers: (builder) => {
@@ -25,10 +35,12 @@ const orderSlice = createSlice({
         state.isLoading = true
         state.error = null
         state.orders = []
+        state.defaultOrders = []
       })
       .addCase(getOrders.fulfilled, (state, action) => {
         state.isLoading = false
         state.orders = action.payload
+        state.defaultOrders = action.payload
       })
       .addCase(getOrders.rejected, (state, action) => {
         state.isLoading = false
@@ -37,5 +49,5 @@ const orderSlice = createSlice({
   },
 })
 
-export const { sortOrders } = orderSlice.actions
+export const { sortOrders, filterOrders } = orderSlice.actions
 export default orderSlice.reducer

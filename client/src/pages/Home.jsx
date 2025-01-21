@@ -11,14 +11,11 @@ import AddCart from "../components/AddCart"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Sidebar from "../components/Sidebar"
-import { useContext } from "react"
-import { AuthContext } from "../context/AuthContext"
 
 function Home() {
   const [product, setProduct] = useState(null)
   const [isOpenSidebar, setIsOpenSidebar] = useState(false)
   const { isLoading, products, error } = useSelector((state) => state.product)
-  const { isAuthenticated } = useContext(AuthContext)
   const token = localStorage.getItem("user-clothshop")
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -26,10 +23,6 @@ function Home() {
   useEffect(() => {
     dispatch(getProducts())
   }, [dispatch])
-
-  useEffect(() => {
-    if (token && !isAuthenticated) navigate("/verify")
-  }, [token, isAuthenticated, navigate])
 
   const renderedProducts = products.map((product) => {
     return (

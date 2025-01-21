@@ -1,58 +1,62 @@
-import { createSlice } from "@reduxjs/toolkit"
-import { addCart, deleteItemCart, getCart } from "../slice/cartSlice"
+import { createAsyncThunk } from "@reduxjs/toolkit"
+import axios from "axios"
+import { API_URL } from "../../../API_URL"
+import { toast } from "react-toastify"
 
-const cartSlice = createSlice({
-  name: "cart",
-  initialState: {
-    isLoading: false,
-    isLoadingDelete: false,
-    message: null,
-    error: null,
-    cart: null,
-  },
-  extraReducers: (reducer) => {
-    reducer
-      .addCase(addCart.pending, (state) => {
-        state.isLoading = true
-        state.message = null
-        state.error = null
-      })
-      .addCase(addCart.fulfilled, (state, action) => {
-        state.isLoading = false
-        state.message = action.payload
-      })
-      .addCase(addCart.rejected, (state, action) => {
-        state.isLoading = false
-        state.error = action.payload
-      })
-      .addCase(getCart.pending, (state) => {
-        state.isLoading = true
-        state.cart = null
-        state.error = null
-      })
-      .addCase(getCart.fulfilled, (state, action) => {
-        state.isLoading = false
-        state.cart = action.payload.cart
-      })
-      .addCase(getCart.rejected, (state, action) => {
-        state.isLoading = false
-        state.error = action.payload
-      })
-      .addCase(deleteItemCart.pending, (state) => {
-        state.isLoadingDelete = true
-        state.message = null
-        state.error = null
-      })
-      .addCase(deleteItemCart.fulfilled, (state, action) => {
-        state.isLoadingDelete = false
-        state.message = action.payload.message
-        state.cart = action.payload.cart
-      })
-      .addCase(deleteItemCart.rejected, (state, action) => {
-        state.isLoadingDelete = false
-        state.error = action.payload
-      })
-  },
-})
+const token = localStorage.getItem("user-clothshop")
 
-export default cartSlice.reducer
+const headers = {
+  Authorization: `Bearer ${token}`,
+}
+
+export const addCart = createAsyncThunk(
+  "cart/addCart",
+  async ({ id, quantity }) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/addCart`,
+        { id, quantity },
+        { headers }
+      )
+      toast.success(response.data.message, {
+        position: "top-center",
+      })
+    } catch (error) {
+      toast.error(error.response.data.message, {
+        position: "top-center",
+      })
+    }
+  }
+)
+
+export const getCart = createAsyncThunk(
+  "cart/getCart",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/getCart`, { headers })
+      return response.data
+    } catch (error) {
+      console.log(error)
+      return rejectWithValue(error.response.data.message)
+    }
+  }
+)
+
+export const deleteItemCart = createAsyncThunk(
+  "cart/deleteItemCart",
+  async ({ id }) => {
+    try {
+      const response = await axios.delete(`${API_URL}/deleteItemCart/${id}`, {
+        headers,
+      })
+      toast.success(response.data.message, {
+        position: "top-center",
+      })
+      return response.data.cart
+    } catch (error) {
+      toast.error(error.response.data.message, {
+        position: "top-center",
+      })
+    }
+  }
+)

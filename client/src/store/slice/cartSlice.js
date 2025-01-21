@@ -1,53 +1,51 @@
-import { createAsyncThunk } from "@reduxjs/toolkit"
-import axios from "axios"
-import { API_URL } from "../../../API_URL"
+import { createSlice } from "@reduxjs/toolkit"
+import { addCart, deleteItemCart, getCart } from "../thunk/cartThunk"
 
-const token = localStorage.getItem("user-clothshop")
-
-const headers = {
-  Authorization: `Bearer ${token}`,
-}
-
-export const addCart = createAsyncThunk(
-  "cart/addCart",
-  async ({ id, quantity }, { rejectWithValue }) => {
-    try {
-      const response = await axios.post(
-        `${API_URL}/addCart`,
-        { id, quantity },
-        { headers }
-      )
-      return response.data.message
-    } catch (error) {
-      console.log(error)
-      return rejectWithValue(error.response.data.message)
-    }
-  }
-)
-
-export const getCart = createAsyncThunk(
-  "cart/getCart",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axios.get(`${API_URL}/getCart`, { headers })
-      return response.data
-    } catch (error) {
-      console.log(error)
-      return rejectWithValue(error.response.data.message)
-    }
-  }
-)
-
-export const deleteItemCart = createAsyncThunk(
-  "cart/deleteItemCart",
-  async ({ id }, { rejectWithValue }) => {
-    try {
-      const response = await axios.delete(`${API_URL}/deleteItemCart/${id}`, {
-        headers,
+const cartSlice = createSlice({
+  name: "cart",
+  initialState: {
+    isLoadingAdd: false,
+    isLoadingGet: false,
+    isLoadingDelete: false,
+    message: null,
+    error: null,
+    cart: [],
+  },
+  extraReducers: (reducer) => {
+    reducer
+      .addCase(addCart.pending, (state) => {
+        state.isLoadingAdd = true
       })
-      return response.data
-    } catch (error) {
-      return rejectWithValue(error.response.data.message)
-    }
-  }
-)
+      .addCase(addCart.fulfilled, (state) => {
+        state.isLoadingAdd = false
+      })
+      .addCase(addCart.rejected, (state) => {
+        state.isLoadingAdd = false
+      })
+      .addCase(getCart.pending, (state) => {
+        state.isLoadingGet = true
+        state.cart = []
+        state.error = null
+      })
+      .addCase(getCart.fulfilled, (state, action) => {
+        state.isLoadingGet = false
+        state.cart = action.payload.cart
+      })
+      .addCase(getCart.rejected, (state, action) => {
+        state.isLoadingGet = false
+        state.error = action.payload
+      })
+      .addCase(deleteItemCart.pending, (state) => {
+        state.isLoadingDelete = true
+      })
+      .addCase(deleteItemCart.fulfilled, (state, action) => {
+        state.isLoadingDelete = false
+        state.cart = action.payload
+      })
+      .addCase(deleteItemCart.rejected, (state) => {
+        state.isLoadingDelete = false
+      })
+  },
+})
+
+export default cartSlice.reducer

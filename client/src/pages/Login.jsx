@@ -1,30 +1,18 @@
 import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { login } from "../store/slice/userSlice"
-import { useNavigate } from "react-router-dom"
 import Spinner from "../components/Spinner"
-import { useEffect } from "react"
+import { login } from "../store/thunk/authThunk"
 
 function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const { isLoading, message, error } = useSelector((state) => state.user)
+  const { isLoadingLogin } = useSelector((state) => state.auth)
   const dispacth = useDispatch()
-  const navigate = useNavigate()
 
   const handleLogin = (e) => {
     e.preventDefault()
     dispacth(login({ email, password }))
   }
-
-  useEffect(() => {
-    if (message) {
-      alert(message)
-      navigate("/")
-    }
-
-    if (error) alert(error)
-  }, [message, error, navigate])
 
   return (
     <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
@@ -96,11 +84,11 @@ function Login() {
 
           <div>
             <button
-              disabled={isLoading}
+              disabled={isLoadingLogin}
               type="submit"
               className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
-              {isLoading ? <Spinner /> : "Login"}
+              {isLoadingLogin ? <Spinner /> : "Login"}
             </button>
           </div>
         </form>

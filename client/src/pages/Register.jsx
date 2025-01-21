@@ -1,31 +1,19 @@
 import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { register } from "../store/slice/userSlice"
-import { useNavigate } from "react-router-dom"
-import { useEffect } from "react"
+import { register } from "../store/thunk/authThunk"
 
 function Register() {
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [password2, setPassword2] = useState("")
-  const { isLoading, message, error } = useSelector((state) => state.user)
+  const { isLoadingRegister } = useSelector((state) => state.auth)
   const dispatch = useDispatch()
-  const navigate = useNavigate()
 
   const handleSubmit = (e) => {
     e.preventDefault()
     dispatch(register({ username, email, password, password2 }))
   }
-
-  useEffect(() => {
-    if (message) {
-      alert(message)
-      navigate("/")
-    }
-
-    if (error) alert(error)
-  })
 
   return (
     <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
@@ -130,7 +118,7 @@ function Register() {
           <div>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoadingRegister}
               className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
               Register

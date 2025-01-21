@@ -3,17 +3,18 @@ import Input from "../components/Input"
 import { useDispatch } from "react-redux"
 import { useSelector } from "react-redux"
 import { useEffect } from "react"
-import { deleteItemCart, getCart } from "../store/slice/cartSlice"
+import { deleteItemCart, getCart } from "../store/thunk/cartThunk"
 import Spinner from "../components/Spinner"
 import axios from "axios"
 import { API_URL } from "../../API_URL"
 import formatCurrency from "../helpers/formatCurrency"
 import { useState } from "react"
+import { toast } from "react-toastify"
 
 function Cart() {
   const navigate = useNavigate()
   const [isLoadingCheckout, setIsLoadingCheckout] = useState(false)
-  const { isLoading, cart, error, isLoadingDelete } = useSelector(
+  const { isLoadingGet, cart, error, isLoadingDelete } = useSelector(
     (state) => state.cart
   )
   const [first_name, setFirst_name] = useState("")
@@ -77,17 +78,17 @@ function Cart() {
         window.snap.pay(response.data.token, {
           onSuccess: (result) => {
             console.log(result)
-            alert("Success")
+            toast.success("Success", { position: "top-center" })
           },
           onError: (error) => {
             console.log(error)
-            alert("Error")
+            toast.error("Error", { position: "top-center" })
           },
         })
         setIsLoadingCheckout(false)
       })
       .catch((error) => {
-        alert(error.response.data.message)
+        toast.error(error.response.data.message, { position: "top-center" })
         setIsLoadingCheckout(false)
       })
   }
@@ -171,7 +172,7 @@ function Cart() {
       <header className="relative max-w-6xl mx-auto">
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/")}
           className="absolute top-2 left-2 border-2 rounded px-2 py-1"
         >
           {"<"} Back
@@ -259,7 +260,7 @@ function Cart() {
             <h2 className="text-center font-bold mb-4">Products & Total</h2>
             <div className="mx-auto max-w-3xl">
               <div className="">
-                {isLoading ? (
+                {isLoadingGet ? (
                   <div className="mt-10">
                     <Spinner />
                   </div>
@@ -274,9 +275,14 @@ function Cart() {
                         <dt>Total</dt>
                         {cart ? (
                           <dd>
-                            {cart.reduce((total, item) => {
-                              return total + item.product.price * item.quantity
-                            }, 0)}{" "}
+                            IDR{" "}
+                            {formatCurrency(
+                              cart.reduce((total, item) => {
+                                return (
+                                  total + item.product.price * item.quantity
+                                )
+                              }, 0)
+                            )}{" "}
                           </dd>
                         ) : (
                           <Spinner />
@@ -287,10 +293,10 @@ function Cart() {
                     <div className="flex justify-end">
                       <button
                         onClick={handleCheckout}
-                        disabled={isLoadingCheckout && isLoading}
+                        disabled={isLoadingCheckout && isLoadingGet}
                         className="block rounded bg-gray-700 px-5 py-3 text-sm text-gray-100 transition hover:bg-gray-600"
                       >
-                        {isLoading ? "Loading..." : "Checkout"}
+                        {isLoadingGet ? "Loading..." : "Checkout"}
                       </button>
                     </div>
                   </div>

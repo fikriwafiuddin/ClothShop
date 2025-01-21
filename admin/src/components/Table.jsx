@@ -14,9 +14,12 @@ const Table = ({ config, data }) => {
       <>
         {data.map((order) => {
           return (
-            <tr key={order.id}>
+            <tr key={order._id}>
               {config.map((col) => (
-                <td key={col.label} className="py-2 px-4 border">
+                <td
+                  key={`${order._id}-${col.label}`}
+                  className="py-2 px-4 border"
+                >
                   {col.render(order)}{" "}
                 </td>
               ))}
@@ -44,7 +47,7 @@ const Table = ({ config, data }) => {
 Table.propTypes = {
   config: PropTypes.arrayOf(
     PropTypes.shape({
-      label: PropTypes.string.isRequired,
+      label: PropTypes.any,
       render: PropTypes.func.isRequired,
     })
   ).isRequired,

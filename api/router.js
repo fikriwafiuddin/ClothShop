@@ -1,5 +1,11 @@
 import express from "express"
-import { getProducts } from "./controllers/productController.js"
+import {
+  addProduct,
+  deleteProduct,
+  getProducts,
+  restockProduct,
+  updateProduct,
+} from "./controllers/productController.js"
 import {
   loginUser,
   registerUser,
@@ -15,8 +21,14 @@ import {
   callbackPayment,
   getTransaction,
 } from "./controllers/transactionController.js"
-import { loginAdmin } from "./controllers/adminController.js"
-import { getMyOrders, getOrders } from "./controllers/orderController.js"
+import { loginAdmin, verifyAdmin } from "./controllers/adminController.js"
+import {
+  deliveredOrder,
+  getMyOrders,
+  getOrders,
+  sendOrder,
+} from "./controllers/orderController.js"
+import { verifyTokenAdmin } from "./middleware/adminMiddleware.js"
 
 const route = express()
 
@@ -29,10 +41,13 @@ route.post("/registerUser", registerUser)
 
 // verify
 route.post("/verifyUser", verifyUser)
+route.post("/verifyAdmin", verifyAdmin)
 
 // order
 route.get("/getMyOrders", verifyToken, getMyOrders)
-route.get("/getOrders", getOrders)
+route.get("/getOrders", verifyTokenAdmin, getOrders)
+route.patch("/sendOrder/:orderId", verifyTokenAdmin, sendOrder)
+route.patch("/deliveredOrder/:orderId", verifyToken, deliveredOrder)
 
 // cart
 route.post("/addCart", verifyToken, addCart)
@@ -41,6 +56,10 @@ route.delete("/deleteItemCart/:idProduct", verifyToken, deleteItemCart)
 
 // product
 route.get("/products", getProducts)
+route.post("/addProduct", verifyTokenAdmin, addProduct)
+route.delete("/deleteProduct/:productId", verifyTokenAdmin, deleteProduct)
+route.patch("/updateProduct/:productId", verifyTokenAdmin, updateProduct)
+route.patch("/restockProduct/:productId", verifyTokenAdmin, restockProduct)
 
 // transaction
 route.post("/getTransaction", verifyToken, getTransaction)

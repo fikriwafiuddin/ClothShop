@@ -2,43 +2,25 @@ import { useNavigate } from "react-router-dom"
 import Header from "../components/Header"
 import OrderDetails from "../components/OrderDetails"
 import { useEffect } from "react"
-import axios from "axios"
-import { useState } from "react"
 import Spinner from "../components/Spinner"
-import { API_URL } from "../../API_URL"
+import { useDispatch, useSelector } from "react-redux"
+import { getOrders } from "../store/thunk/orderThunk"
 
 function MyOrder() {
+  const { isLoadingGet, orders, error } = useSelector((state) => state.order)
   const navigate = useNavigate()
-  const token = localStorage.getItem("user-clothshop")
-  const [orders, setOrders] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-
-  if (!token) navigate("/")
+  const dispatch = useDispatch()
 
   useEffect(() => {
-    const headers = {
-      Authorization: `Bearer ${token}`,
-    }
-    const fetchOrder = async () => {
-      setLoading(true)
-      setError(null)
-      setOrders([])
-      try {
-        const response = await axios.get(`${API_URL}/getMyOrders`, { headers })
-        setOrders(response.data.orders)
-      } catch (error) {
-        setError(error.response.data.message)
-      }
-      setLoading(false)
-    }
-    fetchOrder()
-  }, [token])
+    dispatch(getOrders())
+  }, [dispatch])
+  console.log(orders)
 
   const OrderList = () => {
+    const reversedOrders = [...orders].reverse()
     return (
       <div>
-        {orders.map((order) => (
+        {reversedOrders.map((order) => (
           <OrderDetails key={order._id} order={order} />
         ))}
       </div>
@@ -48,11 +30,21 @@ function MyOrder() {
     <>
       <Header />
       <main className="px-4">
-        <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg">
+        <div className="relative max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="absolute top-2 left-2 border-2 rounded px-2 py-1"
+          >
+            {"<"} Back
+          </button>
           <h1 className="text-3xl font-bold text-center my-6">My Orders</h1>
           <p>{error && error}</p>
-          {loading && <Spinner />}
+          {isLoadingGet && <Spinner />}
           {orders && <OrderList />}
+          {orders?.length === 0 && (
+            <p className="text-center text-gray-500 text-xl">No orders found</p>
+          )}
         </div>
       </main>
     </>

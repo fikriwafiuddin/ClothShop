@@ -5,6 +5,7 @@ function Dashboard() {
   const labels = ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"]
   const numbers = [1500000, 2000000, 1800000, 2200000]
   const label = "Pendapatan (IDR)"
+
   return (
     <MainLayout title={"Dashboard"}>
       <div className="grid grid-cols-4 gap-4">

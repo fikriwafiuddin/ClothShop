@@ -142,7 +142,7 @@ export const callbackPayment = async (req, res) => {
         })
       }
 
-      const updateUser = await User.findByIdAndUpdate(
+      await User.findByIdAndUpdate(
         order.idUser,
         { $set: { cart: [] } },
         { new: true }
@@ -161,7 +161,7 @@ export const callbackPayment = async (req, res) => {
 
     return res.status(200).json({ status: "Success", message: "OK" })
   } catch (error) {
-    console.log(error)
+    // console.log(error)
     return res.status(500).json({ message: "System error" })
   }
 }

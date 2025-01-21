@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom"
+import { useLocation, Link } from "react-router-dom"
 import Icons from "./Icons"
 
 function Sidebar() {
@@ -34,16 +34,16 @@ function Sidebar() {
 
   const RenderedLinks = () => {
     return links.map((value) => (
-      <a
+      <Link
         key={value.label}
-        href={value.url}
+        to={value.url}
         className={`flex gap-2 py-2.5 px-4 text-white font-semibold duration-150 ${
           value.url == currentPath && "ml-5"
         } hover:ml-5`}
       >
         {value.icon}
         {value.label}
-      </a>
+      </Link>
     ))
   }
 

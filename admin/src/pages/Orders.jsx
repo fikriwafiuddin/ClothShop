@@ -4,22 +4,49 @@ import { useDispatch, useSelector } from "react-redux"
 import { getOrders } from "../store/thunk/orderThunk"
 import Table from "../components/Table"
 import Spinner from "../components/Spinner"
-import { useState } from "react"
 import Icons from "../components/Icons"
+import axios from "axios"
+import { API_URL } from "../../API_URL"
+import { useState } from "react"
+import { filterOrders, sortOrders } from "../store/slice/orderSlice"
 
 function Orders() {
-  const { isLoading, error, orders, sortOrders } = useSelector(
-    (state) => state.order
-  )
+  const { isLoading, error, orders } = useSelector((state) => state.order)
+  const [isSelectedFilter, setIsSelectedFilter] = useState("all")
   const dispatch = useDispatch()
 
   const handleSort = () => {
     dispatch(sortOrders({ key: "createdAt", order: "asc" }))
   }
 
+  const token = localStorage.getItem("admin-clothshop")
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  }
+  const handleSendOrder = (id) => {
+    axios
+      .patch(`${API_URL}/sendOrder/${id}`, {}, { headers })
+      .then(() => dispatch(getOrders()))
+      .catch((err) => console.log(err))
+  }
+
   useEffect(() => {
     dispatch(getOrders())
   }, [dispatch])
+
+  const handleFilter = (filter) => {
+    setIsSelectedFilter(filter)
+    dispatch(filterOrders({ filter }))
+  }
+
+  const filterStatus = [
+    "all",
+    "pending",
+    "paid",
+    "shipped",
+    "delivered",
+    "failed",
+  ]
 
   const colorStatus = (status) => {
     let color
@@ -79,6 +106,7 @@ function Orders() {
           </button>
           {data.status == "paid" && (
             <button
+              onClick={() => handleSendOrder(data._id)}
               type="button"
               className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
             >
@@ -93,42 +121,23 @@ function Orders() {
     <MainLayout title="Orders">
       <div className="flex justify-between">
         <div className="flex">
-          <button
-            type="button"
-            className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-          >
-            All
-          </button>
-          <button
-            type="button"
-            className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-          >
-            Pending
-          </button>
-          <button
-            type="button"
-            className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-          >
-            Paid
-          </button>
-          <button
-            type="button"
-            className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-          >
-            Shipped
-          </button>
-          <button
-            type="button"
-            className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-          >
-            Delivered
-          </button>
-          <button
-            type="button"
-            className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-          >
-            Failed
-          </button>
+          {filterStatus.map((value) => (
+            <button
+              onClick={() => handleFilter(value)}
+              key={value}
+              type="button"
+              className={`${
+                isSelectedFilter == value
+                  ? "text-blue-700 bg-gray-100"
+                  : "text-gray-900 bg-white"
+              } py-2.5 px-5 me-2 mb-2 text-sm font-medium focus:outline-none rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700`}
+            >
+              {value
+                .split(" ")
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(" ")}
+            </button>
+          ))}
         </div>
 
         <div className="flex gap-2">
@@ -181,6 +190,11 @@ function Orders() {
         <Spinner />
       ) : (
         orders && <Table data={orders} config={config} />
+      )}
+      {!error && orders.length == 0 && (
+        <p className="text-center text-xl text-gray-600 mt-5">
+          Orders not found
+        </p>
       )}
       {error && <div>{error}</div>}
     </MainLayout>

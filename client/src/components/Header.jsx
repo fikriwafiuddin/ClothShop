@@ -1,9 +1,13 @@
 import PropType from "prop-types"
-import useLogout from "../hooks/useLogout"
+import { Link } from "react-router-dom"
+import { useDispatch, useSelector } from "react-redux"
+import { logout } from "../store/slice/authSlice"
 
 function Header({ handleOpenSidebar }) {
-  const token = localStorage.getItem("user-clothshop")
-  const { logout } = useLogout()
+  const { isAuthenticated } = useSelector((state) => state.auth)
+  const dispatch = useDispatch()
+
+  const handleLogout = () => dispatch(logout())
 
   return (
     <header className="bg-white">
@@ -13,7 +17,7 @@ function Header({ handleOpenSidebar }) {
         </a>
 
         <div className="flex flex-1 items-center justify-end gap-2 sm:gap-5">
-          {token ? (
+          {isAuthenticated ? (
             <>
               <button
                 onClick={() => handleOpenSidebar(true)}
@@ -33,49 +37,49 @@ function Header({ handleOpenSidebar }) {
                   />
                 </svg>
               </button>
-              <a
-                href="/cart"
+              <Link
+                to="/cart"
                 className="hidden sm:inline text-sm text-gray-600"
               >
                 Cart
-              </a>
-              <a
-                href="/myOrders"
+              </Link>
+              <Link
+                to="/myOrders"
                 className="text-sm hidden sm:inline text-gray-600"
               >
                 MyOrders
-              </a>
+              </Link>
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 type="button"
                 className="text-sm hidden sm:inline text-gray-600"
               >
                 Logout
               </button>
-              <a
+              <Link
                 className="rounded-md hidden sm:inline bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-teal-700"
-                href="#"
+                to="#"
               >
                 Chat Admin
-              </a>
+              </Link>
             </>
           ) : (
             <>
-              <a href="/login" className="text-sm text-gray-600">
+              <Link to="/login" className="text-sm text-gray-600">
                 Login
-              </a>
-              <a
-                href="/register"
+              </Link>
+              <Link
+                to="/register"
                 className="text-sm hidden sm:inline text-gray-600"
               >
                 Register
-              </a>
-              <a
+              </Link>
+              <Link
                 className="rounded-md hidden sm:inline bg-teal-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-teal-700"
-                href="#"
+                to="#"
               >
                 Chat Admin
-              </a>
+              </Link>
             </>
           )}
         </div>

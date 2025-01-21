@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken"
+import Admin from "../models/adminModel.js"
 
-export const verifyToken = async (req, res, next) => {
+export const verifyTokenAdmin = async (req, res, next) => {
   let token = req.headers.authorization
   try {
     if (!token) return res.status(401).send("Unauthorized")
@@ -9,7 +10,11 @@ export const verifyToken = async (req, res, next) => {
     token = req.headers.authorization.split(" ")[1]
 
     const decoded = jwt.verify(token, process.env.SECRET_KEY)
-    req.id = decoded.id
+
+    const admin = await Admin.findById(decoded.id).select("-password")
+    if (!admin) return res.status(401).send("Invalid token")
+
+    req.admin = admin
     next()
   } catch (error) {
     console.log(error)
